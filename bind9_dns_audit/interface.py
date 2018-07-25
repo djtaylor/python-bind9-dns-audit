@@ -140,7 +140,7 @@ class BIND9_DNS_Audit_Interface(object):
 
         # No ping report
         if self.args.report_noping:
-            for zone_name, zone_attrs in iteritems(elf.zones['forward']):
+            for zone_name, zone_attrs in iteritems(self.zones['forward']):
                 report_str+='Zone: {0}, No Ping Response Report\n'.format(zone_name)
                 for hostname in zone_attrs['no_ping_response']:
                     report_str+='> {0}\n'.format(hostname)
@@ -151,10 +151,9 @@ class BIND9_DNS_Audit_Interface(object):
 
         # If writing report to file
         if self.args.report_file:
-            stdout.write('Writing report to: {0}'.format(self.args.report_file))
+            stdout.write('Writing report to: {0}\n'.format(self.args.report_file))
             with open(self.args.report_file, 'w') as f:
                 f.write(report_str)
-            stdout.write('DONE\n')
 
         # Print report to stdout
         else:
