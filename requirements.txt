@@ -1,4 +1,1 @@
-requests>=2.18.1
 six>=1.10.0
-multiping>=1.1.2
-dnspython>=1.12.0
