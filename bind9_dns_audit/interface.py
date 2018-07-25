@@ -2,6 +2,7 @@ import re
 import json
 import threading
 from six import iteritems
+from getpass import getpass
 from subprocess import Popen, PIPE
 from sys import stdout,stderr,exit
 
@@ -14,6 +15,18 @@ class BIND9_DNS_Audit_Interface(object):
     """
     def __init__(self, args=None):
         self.args = BIND9_DNS_Audit_Args.construct(args)
+
+        # If prompting for password
+        if self.args.connection.ssh_passwd:
+            ssh_passwd = getpass(prompt="Enter a password for SSH user [{0}]: ".format(self.args.connection.ssh_user))
+        else:
+            stdout.write('Attempting key based authentication to: {0}@{1}:{2}'.format(
+                self.args.connection.ssh_user,
+                self.args.connection.server,
+                self.args.connection.ssh_passwd
+            ))
+
+        # Open an SSH connection
         self.connection = BIND9_DNS_Audit_Connection(
             self.args.connection.server,
             self.args.connection.ssh_user,

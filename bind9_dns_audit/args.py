@@ -23,7 +23,7 @@ class BIND9_DNS_Audit_Args(object):
         parser.add_argument("server", help="The IP address or hostname of a BIND9 server to connect to")
         parser.add_argument("--ssh-user", help="The SSH user to connect with (required), env: BIND9_DNS_AUDIT_SSH_USER")
         parser.add_argument("--ssh-port", help="The SSH port to connect to. Default is 22, env: BIND9_DNS_AUDIT_SSH_PORT", default=22)
-        parser.add_argument("--ssh-passwd", help="The SSH password to use. Defaults to using system keys", default=None)
+        parser.add_argument("--ssh-passwd", help="Prompt for an SSH password. Defaults to using system keys.", action='store_true', default=False)
 
         # BIND9 file paths
         parser.add_argument('--zones-config', help="The BIND9 configuration file to parse for zones (required), env: BIND9_DNS_AUDIT_ZONES_CONF")
