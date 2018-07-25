@@ -14,7 +14,7 @@ $ python setup.py install --prefix /usr/local
 ```
 
 ### Testing
-Testing is done with `unittest` and `nose` for test collection.
+Testing is done with `unittest` and `nose` for test collection in both Python 2 and 3.
 
 ```
 $ python setup.py test
