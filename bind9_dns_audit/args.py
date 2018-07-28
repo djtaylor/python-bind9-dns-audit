@@ -27,6 +27,9 @@ class BIND9_DNS_Audit_Args(object):
         # BIND9 file paths
         parser.add_argument('--zones-config', help="The BIND9 configuration file to parse for zones (required), env: BIND9_DNS_AUDIT_ZONES_CONF")
 
+        # Optional port scanning
+        parser.add_argument('--check-tcp-ports', help="An optional comma separated list of TCP ports to check: --check-tcp-ports 22,80,3389")
+
         # Pretty print
         parser.add_argument('--pretty-print', help="Generate a formatted report for the CLI", action='store_true')
 
@@ -49,6 +52,9 @@ class BIND9_DNS_Audit_Args(object):
 
         # Pretty print report
         self.args['pretty_print'] = getattr(args, 'pretty_print', False)
+
+        # Optional port checks
+        self.args['check_tcp_ports'] = getattr(args, 'check_tcp_ports', None)
 
         # Zones config required
         if not self.args['zones_config']:

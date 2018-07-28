@@ -1,7 +1,8 @@
 import re
 import json
-from time import time
+import socket
 import threading
+from time import time
 from six import iteritems
 from getpass import getpass
 from subprocess import Popen, PIPE
@@ -68,7 +69,8 @@ class BIND9_DNS_Audit_Interface(object):
                 self.zones[zone_type][zone_name]['records'].append({
                     'dnsname': a_record_dnsname,
                     'ipaddr': a_record_ipaddr,
-                    'ping_response': None
+                    'ping_response': None,
+                    'tcp_ports': {}
                 })
 
     def _get_zones(self):
@@ -92,11 +94,11 @@ class BIND9_DNS_Audit_Interface(object):
 
                 # Forward zones
                 if not zone_is_reverse.match(zone_name):
-                    self.zones['forward'][zone_name] = {'records': [], 'no_ping_response': []}
+                    self.zones['forward'][zone_name] = {'records': []}
                     zone_type = 'forward'
                 else:
                     # Reverse zones
-                    self.zones['reverse'][zone_name] = {'records': [], 'no_ping_response': []}
+                    self.zones['reverse'][zone_name] = {'records': []}
                     zone_type = 'reverse'
                 stdout.write('Found zone: {0}, type={1}\n'.format(zone_name, zone_type))
 
@@ -113,6 +115,29 @@ class BIND9_DNS_Audit_Interface(object):
             self._get_zone_records(zone_name, 'forward')
 
         stdout.write('Retrieved all zone records...\n')
+
+    def _check_tcp_port(self, a_record, tcp_port):
+        """
+        Check to see if a particular TCP port is open.
+        """
+        dnsname     = a_record['dnsname']
+        ipaddr     = a_record['ipaddr']
+        record_str = '{0} [{1}]'.format(dnsname, ipaddr)
+
+        # Check if the port is open
+        stdout.write('Checking TCP port {0} connectivity for: {1}...\n'.format(tcp_port, record_str))
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.settimeout(3)
+            s.connect((ipaddr, int(tcp_port)))
+            s.shutdown(2)
+            s.close()
+            stdout.write('TCP port {0} for {1} is OPEN\n'.format(tcp_port, record_str))
+            a_record['tcp_ports'][str(tcp_port)] = True
+        except:
+            stdout.write('TCP port {0} for {1} is CLOSED\n'.format(tcp_port, record_str))
+            a_record['tcp_ports'][str(tcp_port)] = False
+
 
     def _check_zone_record(self, zone_name, zone_type, a_record):
         """
@@ -136,6 +161,12 @@ class BIND9_DNS_Audit_Interface(object):
         else:
             stdout.write('A Record({0}): ping response OK...\n'.format(record_str))
             a_record['ping_response'] = True
+
+        # If checking TCP ports
+        if self.args.check_tcp_ports:
+            check_tcp_ports = self.args.check_tcp_ports.split('\n')
+            for tcp_port in check_tcp_ports:
+                self._check_tcp_port(a_record, tcp_port)
 
     def _check_zone_connectivity(self, zone_name, zone_type, zone_records):
         """
@@ -187,13 +218,22 @@ class BIND9_DNS_Audit_Interface(object):
                     for zone_name, zone_attrs in iteritems(zone_objects):
 
                         # Total records / no response records / total no responses
-                        total_records = len(zone_attrs['records'])
-                        no_responses = [ar for ar in zone_attrs['records'] if not ar['ping_response']]
+                        total_records     = len(zone_attrs['records'])
+                        no_responses      = [ar for ar in zone_attrs['records'] if not ar['ping_response']]
+                        responses         = [ar for ar in zone_attr['records'] if ar['ping_response']]
                         total_no_response = len(no_responses)
 
                         # Format the report for this zone
                         report_str+='Forward Zone Report: {0}, {1} total records\n'.format(zone_name, str(total_records))
-                        report_str+='> {0} records responded to ICMP/ping\n'.format(str(total_records - total_no_response))
+                        report_str+='> {0} records responded to ICMP/ping\n\n'.format(str(total_records - total_no_response))
+                        for response in responses:
+                            report_str+='  {0} [{1}]\n'.format(response['dnsname'], response['ipaddr'])
+                            if response['tcp_ports']:
+                                open_tcp_ports = [tcp_port for tcp_port,port_open in response['tcp_ports'] if port_open]
+                                closed_tcp_ports = [tcp_port for tcp_port,port_open in response['tcp_ports'] if not port_open]
+                                report_str+='  > Open TCP Ports: {0}\n'.format(','.join(open_tcp_ports))
+                                report_str+='  > Closed TCP Ports: {0}\n'.format(','.join(closed_tcp_ports))
+                        report_str+='\n'
                         report_str+='> {0} records DID NOT response to ICMP/ping\n'.format(total_no_response)
                         if not total_no_response == 0:
                             report_str+='\n'
