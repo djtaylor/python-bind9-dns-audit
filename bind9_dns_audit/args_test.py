@@ -18,9 +18,7 @@ class BIND9_DNS_Audit_Args_Test(unittest.TestCase):
         '--ssh-passwd',
         '--zones-config',
         '/etc/bind/named.conf.local',
-        '--report-noping',
-        '--report-file',
-        '/tmp/test.txt']
+        '--pretty-print']
 
     def test_args_parse(self):
         """Test creating an arguments object directly with `parse`"""
