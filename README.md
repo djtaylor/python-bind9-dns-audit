@@ -25,7 +25,7 @@ The following is an example of basic usage to audit a BIND9 DNS server.
 
 ```
 # This will dump a JSON report to stdout and use system SSH host keys to connect
-$ bind9_dns_audit  --ssh-user myuser --ssh-passwd --zones-config /etc/bind/named.conf.local
+$ bind9_dns_audit  --ssh-user myuser --zones-config /etc/bind/named.conf.local
 $
 # Prompt for SSH password if keys not available
 $ bind9_dns_audit 192.168.3.10 --ssh-user myuser --ssh-passwd --zones-config /etc/bind/named.conf.local
