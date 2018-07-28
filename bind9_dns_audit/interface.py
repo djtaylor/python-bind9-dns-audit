@@ -177,7 +177,7 @@ class BIND9_DNS_Audit_Interface(object):
         if self.args.pretty_print:
             report_str+='\nAudit Complete: {0}\n'.format(self.args.connection.server)
             report_str+='{0}\n'.format('-' * 40)
-            report_str+='> time elapsed: {0}\n\n'.format(audit_time_elapsed)
+            report_str+='> time elapsed: {0}s\n\n'.format(audit_time_elapsed)
 
             # Construct by zone
             for zone_type, zone_objects in iteritems(self.zones):

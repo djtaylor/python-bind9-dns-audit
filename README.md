@@ -25,7 +25,32 @@ The following is an example of basic usage to audit a BIND9 DNS server.
 
 ```
 # This will dump a JSON report to stdout and use system SSH host keys to connect
-$ bind9_dns_audit 10.1.1.36 --ssh-user myuser --ssh-passwd --zones-config /etc/bind/named.conf.local
-# Generate a no ping response report and write to file, prompt for SSH password
-$ bind9_dns_audit 10.1.1.36 --ssh-user myuser --ssh-passwd --zones-config /etc/bind/named.conf.local --report-nopoing --report-file /tmp/my_report.txt
+$ bind9_dns_audit  --ssh-user myuser --ssh-passwd --zones-config /etc/bind/named.conf.local
+$
+# Prompt for SSH password if keys not available
+$ bind9_dns_audit 192.168.3.10 --ssh-user myuser --ssh-passwd --zones-config /etc/bind/named.conf.local
+```
+
+##### Pretty Print
+Use the `--pretty-print` parameter to format a report for the CLI. Default is the dump the JSON generated on `stdout`.
+
+```
+$ bind9_dns_audit 192.168.3.10 --ssh-user myuser --zones-config /etc/bind/named.conf.local --pretty-print
+$ .....
+Audit Complete: 192.168.3.10
+----------------------------------------
+> time elapsed: 15.7087161541
+
+Forward Zone Report: firstdomain.com, 5 total records
+> 5 records responded to ICMP/ping
+> 0 records DID NOT response to ICMP/ping
+
+Forward Zone Report: seconddomain.com, 13 total records
+> 10 records responded to ICMP/ping
+> 3 records DID NOT response to ICMP/ping
+
+  deadserver1.seconddomain.com [192.168.3.50]
+  deadserver2.seconddomain.com [192.168.3.55]
+  deadserver3.seconddomain.com [192.168.3.76]
+
 ```
