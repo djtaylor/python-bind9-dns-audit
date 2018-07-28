@@ -22,10 +22,9 @@ class BIND9_DNS_Audit_Interface(object):
         if self.args.connection.ssh_passwd:
             ssh_passwd = getpass(prompt="Enter a password for SSH user [{0}]: ".format(self.args.connection.ssh_user))
         else:
-            stdout.write('Attempting key based authentication to: {0}@{1}:{2}'.format(
+            stdout.write('Attempting key based authentication to: {0}@{1}...\n'.format(
                 self.args.connection.ssh_user,
-                self.args.connection.server,
-                self.args.connection.ssh_passwd
+                self.args.connection.server
             ))
 
         # Open an SSH connection
@@ -123,12 +122,13 @@ class BIND9_DNS_Audit_Interface(object):
         dnsname    = a_record['dnsname']
         ipaddr     = a_record['ipaddr']
         record_str = '{0} [{1}]'.format(dnsname, ipaddr)
+        timeout    = self.args.check_tcp_ports_timeout
 
         # Check if the port is open
-        stdout.write('Checking TCP port {0} connectivity for: {1}...\n'.format(tcp_port, record_str))
+        stdout.write('Checking TCP port {0} connectivity for: {1}, timeout={2}s...\n'.format(tcp_port, record_str, timeout))
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            s.settimeout(2)
+            s.settimeout(int(timeout))
             s.connect((ipaddr, int(tcp_port)))
             s.shutdown(2)
             s.close()
@@ -137,7 +137,6 @@ class BIND9_DNS_Audit_Interface(object):
         except:
             stdout.write('TCP port {0} for {1} is CLOSED\n'.format(tcp_port, record_str))
             a_record['tcp_ports'][str(tcp_port)] = False
-
 
     def _check_zone_record(self, zone_name, zone_type, a_record):
         """
@@ -164,7 +163,7 @@ class BIND9_DNS_Audit_Interface(object):
 
         # If checking TCP ports
         if self.args.check_tcp_ports:
-            check_tcp_ports = self.args.check_tcp_ports.split('\n')
+            check_tcp_ports = self.args.check_tcp_ports.split(',')
             for tcp_port in check_tcp_ports:
                 self._check_tcp_port(a_record, tcp_port)
 
@@ -217,30 +216,37 @@ class BIND9_DNS_Audit_Interface(object):
                 if zone_type == 'forward':
                     for zone_name, zone_attrs in iteritems(zone_objects):
 
-                        # Total records / no response records / total no responses
-                        total_records     = len(zone_attrs['records'])
-                        no_responses      = [ar for ar in zone_attrs['records'] if not ar['ping_response']]
-                        responses         = [ar for ar in zone_attrs['records'] if ar['ping_response']]
-                        total_no_response = len(no_responses)
+                        # Total records / total no ping responses
+                        total_records           = len(zone_attrs['records'])
+                        total_no_ping_responses = len([ar for ar in zone_attrs['records'] if not ar['ping_response']])
 
                         # Format the report for this zone
                         report_str+='Forward Zone Report: {0}, {1} total records\n'.format(zone_name, str(total_records))
-                        report_str+='> {0} records responded to ICMP/ping\n\n'.format(str(total_records - total_no_response))
-                        for response in responses:
-                            report_str+='  {0} [{1}]\n'.format(response['dnsname'], response['ipaddr'])
-                            if response['tcp_ports']:
-                                open_tcp_ports = [tcp_port for tcp_port,port_open in response['tcp_ports'] if port_open]
-                                closed_tcp_ports = [tcp_port for tcp_port,port_open in response['tcp_ports'] if not port_open]
+                        report_str+='> {0} records responded to ICMP/ping\n'.format(str(total_records - total_no_ping_responses))
+                        report_str+='> {0} records DID NOT response to ICMP/ping\n'.format(total_no_ping_responses)
+                        report_str+='> Zone Record Audit Summary:\n\n'
+                        for record in zone_attrs['records']:
+                            report_str+='  {0} [{1}]\n'.format(record['dnsname'], record['ipaddr'])
+                            report_str+='  > ping_response: {0}\n'.format('yes' if record['ping_response'] else 'no')
+                            if record['tcp_ports']:
+                                open_tcp_ports   = [tcp_port for tcp_port,port_open in iteritems(record['tcp_ports']) if port_open]
+                                closed_tcp_ports = [tcp_port for tcp_port,port_open in iteritems(record['tcp_ports']) if not port_open]
                                 report_str+='  > Open TCP Ports: {0}\n'.format(','.join(open_tcp_ports))
                                 report_str+='  > Closed TCP Ports: {0}\n'.format(','.join(closed_tcp_ports))
-                        report_str+='\n'
-                        report_str+='> {0} records DID NOT response to ICMP/ping\n'.format(total_no_response)
-                        if not total_no_response == 0:
                             report_str+='\n'
+
+                        # Records that did not respond to any checks
+                        no_responses = []
+                        for record in zone_attrs['records']:
+                            tcp_ports_open = any([tcp_port for tcp_port,port_open in iteritems(record['tcp_ports']) if port_open])
+                            if not record['ping_response'] and not tcp_ports_open:
+                                no_responses.append(record['dnsname'])
+
+                        # Display no responses
+                        if no_responses:
+                            report_str+='  A Records w/ No Response (ICMP/TCP Ports):\n'
                             for no_response in no_responses:
-                                report_str+='  {0} [{1}]\n'.format(no_response['dnsname'], no_response['ipaddr'])
-                            report_str+='\n'
-                        else:
+                                report_str+='  > {0}\n'.format(no_response)
                             report_str+='\n'
 
                 # Reverse zones

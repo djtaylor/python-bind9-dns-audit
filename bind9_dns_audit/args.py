@@ -29,6 +29,7 @@ class BIND9_DNS_Audit_Args(object):
 
         # Optional port scanning
         parser.add_argument('--check-tcp-ports', help="An optional comma separated list of TCP ports to check: --check-tcp-ports 22,80,3389")
+        parser.add_argument('--check-tcp-ports-timeout', help="A timeout value in seconds for TCP port checks. Defaults to 2 seconds", default=2)
 
         # Pretty print
         parser.add_argument('--pretty-print', help="Generate a formatted report for the CLI", action='store_true')
@@ -55,6 +56,7 @@ class BIND9_DNS_Audit_Args(object):
 
         # Optional port checks
         self.args['check_tcp_ports'] = getattr(args, 'check_tcp_ports', None)
+        self.args['check_tcp_ports_timeout'] = getattr(args, 'check_tcp_ports_timeout')
 
         # Zones config required
         if not self.args['zones_config']:
