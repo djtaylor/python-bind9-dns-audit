@@ -120,7 +120,7 @@ class BIND9_DNS_Audit_Interface(object):
         """
         Check to see if a particular TCP port is open.
         """
-        dnsname     = a_record['dnsname']
+        dnsname    = a_record['dnsname']
         ipaddr     = a_record['ipaddr']
         record_str = '{0} [{1}]'.format(dnsname, ipaddr)
 
@@ -128,7 +128,7 @@ class BIND9_DNS_Audit_Interface(object):
         stdout.write('Checking TCP port {0} connectivity for: {1}...\n'.format(tcp_port, record_str))
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            s.settimeout(3)
+            s.settimeout(2)
             s.connect((ipaddr, int(tcp_port)))
             s.shutdown(2)
             s.close()
@@ -220,7 +220,7 @@ class BIND9_DNS_Audit_Interface(object):
                         # Total records / no response records / total no responses
                         total_records     = len(zone_attrs['records'])
                         no_responses      = [ar for ar in zone_attrs['records'] if not ar['ping_response']]
-                        responses         = [ar for ar in zone_attr['records'] if ar['ping_response']]
+                        responses         = [ar for ar in zone_attrs['records'] if ar['ping_response']]
                         total_no_response = len(no_responses)
 
                         # Format the report for this zone
