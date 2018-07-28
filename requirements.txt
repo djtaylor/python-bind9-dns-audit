@@ -1,2 +1,3 @@
 six>=1.10.0
 paramiko>=2.1.2
+immutable_collection>=0.1.post1

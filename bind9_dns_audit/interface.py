@@ -1,5 +1,6 @@
 import re
 import json
+from time import time
 import threading
 from six import iteritems
 from getpass import getpass
@@ -54,11 +55,21 @@ class BIND9_DNS_Audit_Interface(object):
         zone_config = self.connection.get_file(zone_config_file)
         record_is_a = re.compile(r'^[\w.]+\.\s+IN\s+A')
 
+        # Extract zone A records
         for line in zone_config.split('\n'):
             if record_is_a.match(line):
-                a_record_val = line.split('\t')[0][:-1]
-                stdout.write('Found A record: {0}\n'.format(a_record_val))
-                self.zones[zone_type][zone_name]['records'].append(a_record_val)
+
+                # Get the A record DNS name and associated IP address
+                a_record_dnsname = line.split('\t')[0][:-1]
+                a_record_ipaddr  = line.split('\t')[3]
+
+                # Store the record
+                stdout.write('Found A record: {0} [{1}]\n'.format(a_record_dnsname, a_record_ipaddr))
+                self.zones[zone_type][zone_name]['records'].append({
+                    'dnsname': a_record_dnsname,
+                    'ipaddr': a_record_ipaddr,
+                    'ping_response': None
+                })
 
     def _get_zones(self):
         """
@@ -103,21 +114,28 @@ class BIND9_DNS_Audit_Interface(object):
 
         stdout.write('Retrieved all zone records...\n')
 
-    def _check_zone_record(self, zone_name, zone_type, hostname):
+    def _check_zone_record(self, zone_name, zone_type, a_record):
         """
         Thread worker for checking ICMP connectivity to a host.
         """
-        stdout.write('Checking ICMP connectivity for: {0}...\n'.format(hostname))
-        proc = Popen(['/usr/bin/env', 'ping', '-c', '3', hostname], stdout=PIPE, stderr=PIPE)
+        dnsname    = a_record['dnsname']
+        ipaddr     = a_record['ipaddr']
+        record_str = '{0} [{1}]'.format(dnsname, ipaddr)
+
+        # Run basic ping check
+        stdout.write('Checking ICMP connectivity for: {0}...\n'.format(record_str))
+        proc = Popen(['/usr/bin/env', 'ping', '-c', '3', dnsname], stdout=PIPE, stderr=PIPE)
         proc.communicate()
 
         # No response to ping, can possibly be deleted
         if not proc.returncode == 0:
-            stdout.write('A Record[{0}]: no ping response...\n'.format(hostname))
-            self.zones[zone_type][zone_name]['no_ping_response'].append(hostname)
-            return False
-        stdout.write('A Record[{0}]: ping response OK...\n'.format(hostname))
-        return True
+            stdout.write('A Record({0}): no ping response...\n'.format(record_str))
+            a_record['ping_response'] = False
+
+        # Responds to ping
+        else:
+            stdout.write('A Record({0}): ping response OK...\n'.format(record_str))
+            a_record['ping_response'] = True
 
     def _check_zone_connectivity(self, zone_name, zone_type, zone_records):
         """
@@ -129,6 +147,7 @@ class BIND9_DNS_Audit_Interface(object):
             self.zone_record_threads.append(t)
             t.start()
 
+        # Wait for zone record connectivity tests to complete
         for t in self.zone_record_threads:
             t.join()
 
@@ -145,30 +164,53 @@ class BIND9_DNS_Audit_Interface(object):
         """
         Run the client with the given arguments.
         """
+        audit_start = time()
         self.connection.ssh_open()
         self._get_zones()
         self._check_zones()
+        audit_end = time()
+        audit_time_elapsed = audit_end - audit_start
 
         report_str = ""
 
-        # No ping report
-        if self.args.report_noping:
-            for zone_name, zone_attrs in iteritems(self.zones['forward']):
-                report_str+='Zone: {0}, No Ping Response Report\n'.format(zone_name)
-                for hostname in zone_attrs['no_ping_response']:
-                    report_str+='> {0}\n'.format(hostname)
+        # Pretty print a report for CLI viewing
+        if self.args.pretty_print:
+            report_str+='\nAudit Complete: {0}\n'.format(self.args.connection.server)
+            report_str+='{0}\n'.format('-' * 40)
+            report_str+='> time elapsed: {0}\n\n'.format(audit_time_elapsed)
+
+            # Construct by zone
+            for zone_type, zone_objects in iteritems(self.zones):
+
+                # Forward zones
+                if zone_type == 'forward':
+                    for zone_name, zone_attrs in iteritems(zone_objects):
+
+                        # Total records / no response records / total no responses
+                        total_records = len(zone_attrs['records'])
+                        no_responses = [ar for ar in zone_attrs['records'] if not ar['ping_response']]
+                        total_no_response = len(no_responses)
+
+                        # Format the report for this zone
+                        report_str+='Forward Zone Report: {0}, {1} total records\n'.format(zone_name, str(total_records))
+                        report_str+='> {0} records responded to ICMP/ping\n'.format(str(total_records - total_no_response))
+                        report_str+='> {0} records DID NOT response to ICMP/ping\n'.format(total_no_response)
+                        if not total_no_response == 0:
+                            report_str+='\n'
+                            for no_response in no_responses:
+                                report_str+='  {0} [{1}]\n'.format(no_response['dnsname'], no_response['ipaddr'])
+                            report_str+='\n'
+                        else:
+                            report_str+='\n'
+
+                # Reverse zones
+                if zone_type == 'reverse':
+                    continue
+
+            # Write report to stdout
+            stdout.write(report_str)
 
         # Dump full JSON output
         else:
             report_str=json.dumps(self.zones, indent=2)
-
-        # If writing report to file
-        if self.args.report_file:
-            stdout.write('Writing report to: {0}\n'.format(self.args.report_file))
-            with open(self.args.report_file, 'w') as f:
-                f.write(report_str)
-
-        # Print report to stdout
-        else:
-            stdout.write(report_str)
         exit(0)

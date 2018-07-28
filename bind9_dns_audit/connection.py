@@ -5,7 +5,7 @@ class BIND9_DNS_Audit_Connection(object):
     """
     Class for managing SSH connection to a BIND9 server.
     """
-    def __init__(self, server, ssh_user, ssh_port=22, ssh_passwd=None):
+    def __init__(self, server, ssh_user, ssh_port=22, ssh_passwd=False):
         self.server     = server
         self.ssh_user   = ssh_user
         self.ssh_port   = ssh_port

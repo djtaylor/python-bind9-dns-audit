@@ -1,8 +1,7 @@
 import argparse
 from os import getenv
 from sys import stderr, exit, argv
-
-from bind9_dns_audit.collection import Collection
+from immutable_collection import ImmutableCollection
 
 class BIND9_DNS_Audit_Args(object):
     """
@@ -28,9 +27,8 @@ class BIND9_DNS_Audit_Args(object):
         # BIND9 file paths
         parser.add_argument('--zones-config', help="The BIND9 configuration file to parse for zones (required), env: BIND9_DNS_AUDIT_ZONES_CONF")
 
-        # Report arguments
-        parser.add_argument('--report-noping', help="Generate a report showing no ping responses", action='store_true')
-        parser.add_argument('--report-file', help="Write the report to a file instead of stdout", default=None)
+        # Pretty print
+        parser.add_argument('--pretty-print', help="Generate a formatted report for the CLI", action='store_true')
 
         # Parse provided arguments
         args = parser.parse_args(args)
@@ -49,9 +47,8 @@ class BIND9_DNS_Audit_Args(object):
         # Store BIND9 file paths
         self.args['zones_config'] = getenv('BIND9_DNS_AUDIT_ZONES_CONF', getattr(args, 'zones_config'))
 
-        # Report flags
-        self.args['report_noping'] = getattr(args, 'report_noping', False)
-        self.args['report_file'] = getattr(args, 'report_file', None)
+        # Pretty print report
+        self.args['pretty_print'] = getattr(args, 'pretty_print', False)
 
         # Zones config required
         if not self.args['zones_config']:
@@ -72,7 +69,7 @@ class BIND9_DNS_Audit_Args(object):
         """
         Return the immutable collection for arguments.
         """
-        return Collection.create(self.args)
+        return ImmutableCollection.create(self.args)
 
     @classmethod
     def construct(cls, args=argv[1:]):
