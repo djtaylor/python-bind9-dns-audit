@@ -19,6 +19,9 @@ class BIND9_DNS_Audit_Interface_Test(unittest.TestCase):
         """Test running the audit against a Docker container"""
         interface = BIND9_DNS_Audit_Interface(args=self.test_args)
 
+        with open('docker_test_files/id_rsa_test') as f:
+            print f.read()
+
         # Script should run then exit
         with self.assertRaises(SystemExit) as cm:
             interface.run()
