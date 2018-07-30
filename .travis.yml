@@ -7,13 +7,17 @@ python:
   - "3.7-dev"
 
 before_install:
-- chmod 600 docker_test_files/id_rsa_test
 - docker pull resystit/bind9:latest
-- docker run -d --name bind9_dns_audit_test -p 60053:53 -p 60053:53/udp -p 60022:22 -v $(pwd)/docker_test_files/named.conf:/etc/bind/named.conf:ro -v $(pwd)/docker_test_files/zone1.conf:/etc/bind/master/zone1.local.conf:ro -v $(pwd)/docker_test_files/zone2.conf:/etc/bind/master/zone2.local.conf:ro -v $(pwd)/docker_test_files/id_rsa_test.pub:/root/.ssh/authorized_keys:ro resystit/bind9:latest
+- docker run -d --name bind9_dns_audit_test -p 60053:53 -p 60053:53/udp -p 60022:22 -v $(pwd)/docker_test_files/named.conf:/etc/bind/named.conf:ro -v $(pwd)/docker_test_files/zone1.conf:/etc/bind/master/zone1.local.conf:ro -v $(pwd)/docker_test_files/zone2.conf:/etc/bind/master/zone2.local.conf:ro resystit/bind9:latest
 - docker exec bind9_dns_audit_test sh -c "apk add --update git openssh-client openssh-server"
+- docker exec bind9_dns_audit_test sh -c "mkdir /root/.ssh"
 - docker exec bind9_dns_audit_test sh -c "chmod 700 /root/.ssh"
 - docker cp $(pwd)/docker_test_files/id_rsa_host_test bind9_dns_audit_test:/etc/ssh/ssh_host_rsa_key
 - docker cp $(pwd)/docker_test_files/id_rsa_host_test.pub bind9_dns_audit_test:/etc/ssh/ssh_host_rsa_key.pub
+- docker exec bind9_dns_audit_test sh -c "chown root:root /etc/ssh/ssh_host_rsa_key*"
+- docker cp $(pwd)/docker_test_files/id_rsa_test.pub bind9_dns_audit_test:/root/.ssh/authorized_keys
+- docker exec bind9_dns_audit_test sh -c "chmod 644 /root/.ssh/authorized_keys"
+- docker exec bind9_dns_audit_test sh -c "chown root:root /root/.ssh/authorized_keys"
 - docker exec bind9_dns_audit_test sh -c "chmod 600 /etc/ssh/ssh_host_rsa_key"
 - docker exec -d bind9_dns_audit_test sh -c "/usr/sbin/sshd -D -f /etc/ssh/sshd_config"
 
