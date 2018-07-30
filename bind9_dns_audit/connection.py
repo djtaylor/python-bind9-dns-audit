@@ -45,7 +45,7 @@ class BIND9_DNS_Audit_Connection(object):
             stdout.write('SUCCESS\n')
 
             # Return contents
-            return file_contents
+            return file_contents.encode()
 
         # Failed to get file contents
         except Exception as e:
