@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import paramiko
 import traceback
 from hashlib import md5
