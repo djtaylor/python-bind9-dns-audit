@@ -243,8 +243,11 @@ class BIND9_DNS_Audit_Interface(object):
                                 no_responses.append(record['dnsname'])
 
                         # Display no responses
+                        no_response_checks = 'ping'
+                        if self.args.check_tcp_ports:
+                            no_response_checks+='/tcp_ports[{0}],timeout={1}s'.format(self.args.check_tcp_ports, self.args.check_tcp_ports_timeout)
                         if no_responses:
-                            report_str+='  A Records w/ No Response (ICMP/TCP Ports):\n'
+                            report_str+='  A Records w/ No Response ({0}):\n'.format(no_response_checks)
                             for no_response in no_responses:
                                 report_str+='  > {0}\n'.format(no_response)
                             report_str+='\n'
