@@ -1,15 +1,23 @@
 import paramiko
+import traceback
 from sys import stderr, stdout, exit
+
+paramiko.util.log_to_file("ssh_client_debug.log")
 
 class BIND9_DNS_Audit_Connection(object):
     """
     Class for managing SSH connection to a BIND9 server.
     """
-    def __init__(self, server, ssh_user, ssh_port=22, ssh_passwd=False):
+    def __init__(self, server, ssh_user, ssh_port=22, ssh_passwd=None, ssh_key=None):
         self.server     = server
         self.ssh_user   = ssh_user
-        self.ssh_port   = ssh_port
+        self.ssh_port   = int(ssh_port)
         self.ssh_passwd = ssh_passwd
+        self.ssh_key    = ssh_key
+
+        # Show the key
+        if self.ssh_key:
+            stdout.write('Using private key: {0}\n'.format(self.ssh_key))
 
         # Client object
         self.ssh_client = None
@@ -55,11 +63,13 @@ class BIND9_DNS_Audit_Connection(object):
             self.ssh_client.connect(self.server,
                 port=self.ssh_port,
                 username=self.ssh_user,
-                password=self.ssh_passwd)
+                password=self.ssh_passwd,
+                key_filename=self.ssh_key)
 
             # Connection established
             stdout.write('SUCCESS\n')
         except Exception as e:
             stdout.write('FAILED\n')
             stderr.write('Failed to open SSH connection to [{0}]: {1}\n'.format(self.server, str(e)))
+            traceback.print_exc()
             exit(1)

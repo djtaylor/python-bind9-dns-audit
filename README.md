@@ -29,28 +29,40 @@ $ bind9_dns_audit  --ssh-user myuser --zones-config /etc/bind/named.conf.local
 $
 # Prompt for SSH password if keys not available
 $ bind9_dns_audit 192.168.3.10 --ssh-user myuser --ssh-passwd --zones-config /etc/bind/named.conf.local
+# Scan TCP ports in case infrastructure not responding to ICMP
+$ bind9_dns_audit 192.168.3.10 --ssh-user myuser --zones-config /etc/bind/named.conf.local --check-tcp-ports 22,80,443
+# Explicitly tell the script which SSH key file to use, use the default parent configuration (/etc/bind/named.conf)
+$ bind9_dns_audit 192.168.3.10 --ssh-user myuser --ssh-key /path/to/key.rsa
 ```
+
+Depending on your use case you may also use the `--check-tcp-ports-timeout` to increase the timeout for port checks. Default is `2`. Value is in seconds.
 
 ##### Pretty Print
 Use the `--pretty-print` parameter to format a report for the CLI. Default is the dump the JSON generated on `stdout`.
 
 ```
-$ bind9_dns_audit 192.168.3.10 --ssh-user myuser --zones-config /etc/bind/named.conf.local --pretty-print
+$ bind9_dns_audit 192.168.3.10 --ssh-user myuser --zones-config /etc/bind/named.conf.local --check-tcp-ports 22,80,443 --pretty-print
 $ .....
 Audit Complete: 192.168.3.10
 ----------------------------------------
 > time elapsed: 15.7087161541
 
-Forward Zone Report: firstdomain.com, 5 total records
-> 5 records responded to ICMP/ping
-> 0 records DID NOT response to ICMP/ping
-
-Forward Zone Report: seconddomain.com, 13 total records
-> 10 records responded to ICMP/ping
+Forward Zone Report: mydomain.com, 13 total records
+> 1 records responded to ICMP/ping
 > 3 records DID NOT response to ICMP/ping
 
-  deadserver1.seconddomain.com [192.168.3.50]
-  deadserver2.seconddomain.com [192.168.3.55]
-  deadserver3.seconddomain.com [192.168.3.76]
+  one.mydomain.com [192.168.3.55]
+  > ping_response: no
+  > Open TCP Ports: 22
+  > Closed TCP Ports: 80,443
+
+  two.mydomain.com [192.168.3.59]
+  > ping_response: yes
+  > Open TCP Ports: 22, 443
+  > Closed TCP Ports: 80
+
+  A Records w/ No Response (ping/tcp_ports[22,80,443],timeout=2s):
+  > three.mydomain.com [192.168.3.99]
+  > four.mydomain.com [192.168.3.42]
 
 ```

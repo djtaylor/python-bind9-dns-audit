@@ -32,7 +32,8 @@ class BIND9_DNS_Audit_Interface(object):
             self.args.connection.server,
             self.args.connection.ssh_user,
             ssh_port=self.args.connection.ssh_port,
-            ssh_passwd=self.args.connection.ssh_passwd)
+            ssh_passwd=self.args.connection.ssh_passwd,
+            ssh_key=self.args.connection.ssh_key)
 
         # Zones objects
         self.zones = {
@@ -58,10 +59,11 @@ class BIND9_DNS_Audit_Interface(object):
         # Extract zone A records
         for line in zone_config.split('\n'):
             if record_is_a.match(line):
+                formatted_line = re.sub(' +', ' ', line.replace('\t', ' '))
 
                 # Get the A record DNS name and associated IP address
-                a_record_dnsname = line.split('\t')[0][:-1]
-                a_record_ipaddr  = line.split('\t')[3]
+                a_record_dnsname = formatted_line.split(' ')[0][:-1]
+                a_record_ipaddr  = formatted_line.split(' ')[3]
 
                 # Store the record
                 stdout.write('Found A record: {0} [{1}]\n'.format(a_record_dnsname, a_record_ipaddr))
@@ -102,11 +104,11 @@ class BIND9_DNS_Audit_Interface(object):
                 stdout.write('Found zone: {0}, type={1}\n'.format(zone_name, zone_type))
 
             # Zone type (master/slave)
-            if 'type' in line:
+            if zone_type_regex.match(line):
                 self.zones[zone_type][current_zone]['type'] = zone_type_regex.sub('\g<1>', line)
 
             # Zone config
-            if 'file' in line:
+            if zone_file_regex.match(line):
                 self.zones[zone_type][current_zone]['config'] = zone_file_regex.sub(r'\g<1>', line)
 
         # Get zone records (only forward for now)
@@ -240,7 +242,7 @@ class BIND9_DNS_Audit_Interface(object):
                         for record in zone_attrs['records']:
                             tcp_ports_open = any([tcp_port for tcp_port,port_open in iteritems(record['tcp_ports']) if port_open])
                             if not record['ping_response'] and not tcp_ports_open:
-                                no_responses.append(record['dnsname'])
+                                no_responses.append(record)
 
                         # Display no responses
                         no_response_checks = 'ping'
@@ -249,7 +251,7 @@ class BIND9_DNS_Audit_Interface(object):
                         if no_responses:
                             report_str+='  A Records w/ No Response ({0}):\n'.format(no_response_checks)
                             for no_response in no_responses:
-                                report_str+='  > {0}\n'.format(no_response)
+                                report_str+='  > {0} [{1}]\n'.format(no_response['dnsname'], no_response['ipaddr'])
                             report_str+='\n'
 
                 # Reverse zones
