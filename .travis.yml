@@ -7,7 +7,7 @@ python:
   - "3.7-dev"
 
 before_install:
-- ls -ltrha docker_test_files
+- ls -ltrha docker_test_files 1>&2
 - docker pull resystit/bind9:latest
 - docker run -d --name bind9_dns_audit_test -p 60053:53 -p 60053:53/udp -p 60022:22 -v $(pwd)/docker_test_files/named.conf:/etc/bind/named.conf:ro -v $(pwd)/docker_test_files/zone1.conf:/etc/bind/master/zone1.local.conf:ro -v $(pwd)/docker_test_files/zone2.conf:/etc/bind/master/zone2.local.conf:ro -v $(pwd)/docker_test_files/id_rsa_test.pub:/root/.ssh/authorized_keys:ro resystit/bind9:latest
 - docker exec bind9_dns_audit_test sh -c "apk add --update git openssh-client openssh-server"
