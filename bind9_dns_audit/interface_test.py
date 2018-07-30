@@ -1,9 +1,12 @@
 import unittest
+from sys import stdout
 
 from bind9_dns_audit.interface import BIND9_DNS_Audit_Interface
 
 class BIND9_DNS_Audit_Interface_Test(unittest.TestCase):
     """Tests for `interface.py`."""
+
+    test_private_key = 'docker_test_files/id_rsa_test'
 
     test_args = [
         '127.0.0.1',
@@ -12,15 +15,12 @@ class BIND9_DNS_Audit_Interface_Test(unittest.TestCase):
         '--ssh-port',
         '60022',
         '--ssh-key',
-        'docker_test_files/id_rsa_test'
+        test_private_key
     ]
 
     def test_interface(self):
         """Test running the audit against a Docker container"""
         interface = BIND9_DNS_Audit_Interface(args=self.test_args)
-
-        with open('docker_test_files/id_rsa_test') as f:
-            print f.read()
 
         # Script should run then exit
         with self.assertRaises(SystemExit) as cm:

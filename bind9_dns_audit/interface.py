@@ -21,11 +21,6 @@ class BIND9_DNS_Audit_Interface(object):
         # If prompting for password
         if self.args.connection.ssh_passwd:
             ssh_passwd = getpass(prompt="Enter a password for SSH user [{0}]: ".format(self.args.connection.ssh_user))
-        else:
-            stdout.write('Attempting key based authentication to: {0}@{1}...\n'.format(
-                self.args.connection.ssh_user,
-                self.args.connection.server
-            ))
 
         # Open an SSH connection
         self.connection = BIND9_DNS_Audit_Connection(

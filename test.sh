@@ -33,11 +33,7 @@ echo "------------------------------------------------------------"
 
 # Test complete
 echo "------------------------------------------------------------"
-if [ "$?" == "0" ]; then
-  echo "> Test suite completed successfully, beginning cleanup..."
-else
-  echo "> Test suite failed to complete, beginning cleanup..."
-fi
+echo "> Test suite completed, beginning cleanup..."
 
 # Stop down the container
 echo "------------------------------------------------------------"
