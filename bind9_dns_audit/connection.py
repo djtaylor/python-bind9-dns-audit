@@ -1,6 +1,5 @@
 import paramiko
 import traceback
-from hashlib import md5
 from builtins import bytes
 from sys import stderr, stdout, exit
 
@@ -16,14 +15,6 @@ class BIND9_DNS_Audit_Connection(object):
         self.ssh_port   = int(ssh_port)
         self.ssh_passwd = ssh_passwd
         self.ssh_key    = ssh_key
-
-        # Show the key
-        if self.ssh_key:
-            hash_md5 = md5()
-            with open(self.ssh_key, 'rb') as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    hash_md5.update(chunk)
-            stdout.write('Using private key: {0}, md5={1}\n'.format(self.ssh_key, hash_md5.hexdigest()))
 
         # Client object
         self.ssh_client = None
