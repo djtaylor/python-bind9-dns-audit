@@ -14,10 +14,10 @@ $ python setup.py install --prefix /usr/local
 ```
 
 ### Testing
-Testing is done with `unittest` and `nose` for test collection in both Python 2 and 3.
+To run the test suite for this module you must have [Docker](https://www.docker.com/get-docker) available on the machine you will be testing on. This spins up a BIND9 Docker container, sets up SSHD, injects keys, and also configuration files for parsing during the test.
 
 ```
-$ python setup.py test
+$ ./test.sh
 ```
 
 ### Usage

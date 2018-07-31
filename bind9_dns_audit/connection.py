@@ -1,7 +1,7 @@
-from __future__ import unicode_literals
 import paramiko
 import traceback
 from hashlib import md5
+from builtins import bytes
 from sys import stderr, stdout, exit
 
 paramiko.util.log_to_file("ssh_client_debug.log")
@@ -45,7 +45,7 @@ class BIND9_DNS_Audit_Connection(object):
             stdout.write('SUCCESS\n')
 
             # Return contents
-            return file_contents.encode()
+            return bytes(b'{0}'.format(file_contents))
 
         # Failed to get file contents
         except Exception as e:

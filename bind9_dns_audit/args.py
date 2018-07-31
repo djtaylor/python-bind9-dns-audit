@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import argparse
 from os import getenv
 from sys import stderr, exit, argv
