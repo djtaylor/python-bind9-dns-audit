@@ -64,11 +64,6 @@ class BIND9_DNS_Audit_Args(object):
         self.args['check_tcp_ports'] = getattr(args, 'check_tcp_ports', None)
         self.args['check_tcp_ports_timeout'] = getattr(args, 'check_tcp_ports_timeout')
 
-        # Zones config required
-        if not self.args['zones_config']:
-            stderr.write('ERROR: The parameter "zones_config" is required\n')
-            exit(1)
-
         # Params look good
         return True
 
