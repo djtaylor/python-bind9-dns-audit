@@ -15,10 +15,14 @@ class BIND9_DNS_Audit_Args_Test(unittest.TestCase):
         'test',
         '--ssh-port',
         '22',
-        '--ssh-passwd',
         '--zones-config',
         '/etc/bind/named.conf.local',
-        '--pretty-print']
+        '--pretty-print',
+        '--check-tcp-ports',
+        '22,40',
+        '--check-tcp-ports-timeout',
+        '1',
+        '--debug']
 
     def test_args_parse(self):
         """Test creating an arguments object directly with `parse`"""

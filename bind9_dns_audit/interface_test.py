@@ -1,5 +1,5 @@
 import unittest
-from sys import stdout
+from mock import patch
 
 from bind9_dns_audit.interface import BIND9_DNS_Audit_Interface
 
@@ -15,7 +15,13 @@ class BIND9_DNS_Audit_Interface_Test(unittest.TestCase):
         '--ssh-port',
         '60022',
         '--ssh-key',
-        test_private_key
+        test_private_key,
+        '--check-tcp-ports',
+        '22,443',
+        '--check-tcp-ports-timeout',
+        '1',
+        '--csv',
+        '--debug'
     ]
 
     def test_interface(self):

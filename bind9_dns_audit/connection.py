@@ -1,19 +1,21 @@
+from __future__ import unicode_literals
+from builtins import str
 import paramiko
 import traceback
-from builtins import bytes
-from sys import stderr, stdout, exit
+from sys import stderr, exit
 
 paramiko.util.log_to_file("ssh_client_debug.log")
 
-class BIND9_DNS_Audit_Connection(object):
+from bind9_dns_audit.common import BIND9_DNS_Audit_Common
+
+class BIND9_DNS_Audit_Connection(BIND9_DNS_Audit_Common):
     """
     Class for managing SSH connection to a BIND9 server.
     """
-    def __init__(self, server, ssh_user, ssh_port=22, ssh_passwd=None, ssh_key=None):
+    def __init__(self, server, ssh_user, ssh_port=22, ssh_key=None):
         self.server     = server
         self.ssh_user   = ssh_user
         self.ssh_port   = int(ssh_port)
-        self.ssh_passwd = ssh_passwd
         self.ssh_key    = ssh_key
 
         # Client object
@@ -22,34 +24,35 @@ class BIND9_DNS_Audit_Connection(object):
     def get_file(self, file_path):
         """ Get the contents of a remote file """
 
-        stdout.write('Getting contents of "{0}:{1}"...'.format(self.server, file_path))
+        self.write_stdout('Getting contents of "{}:{}"...'.format(self.server, file_path), newline=False)
         try:
 
             # Get the named config file
-            _stdin, _stdout, _stderr = self.ssh_client.exec_command('cat {0}'.format(file_path))
+            _stdin, _stdout, _stderr = self.ssh_client.exec_command('cat {}'.format(file_path))
 
             file_contents = _stdout.read()
             if not file_contents:
-                stdout.write('FAILED\n')
-                stderr.write('ERROR: Could not retrieve file contents\n')
-                stderr.write('> stderr: \n{0}'.format(_stderr.read()))
-            stdout.write('SUCCESS\n')
+                self.write_stdout('FAILED', prefix=False)
+                self.die([
+                    'ERROR: Could not retrieve file contents',
+                    '> stderr: \n{}'.format(_stderr.read())
+                ])
+            self.write_stdout('SUCCESS', prefix=False)
 
             # Return contents
-            return bytes(b'{0}'.format(file_contents))
+            return file_contents
 
         # Failed to get file contents
         except Exception as e:
-            stdout.write('FAILED\n')
-            stderr.write('ERROR: Failed to get file contents: {0}\n'.format(str(e)))
-            exit(1)
+            self.write_stdout('FAILED', prefix=False)
+            self.die('ERROR: Failed to get file contents: {}\n'.format(str(e)))
 
     def ssh_open(self):
         """ Open the SSH connection """
 
         # Try to establish a connection
         try:
-            stdout.write('Opening SSH connection: {0}@{1}...'.format(self.ssh_user, self.server))
+            self.write_stdout('Opening SSH connection: {}@{}...'.format(self.ssh_user, self.server), newline=False)
 
             # Make a new SSH connection object
             self.ssh_client = paramiko.SSHClient()
@@ -60,13 +63,13 @@ class BIND9_DNS_Audit_Connection(object):
             self.ssh_client.connect(self.server,
                 port=self.ssh_port,
                 username=self.ssh_user,
-                password=self.ssh_passwd,
                 key_filename=self.ssh_key)
 
             # Connection established
-            stdout.write('SUCCESS\n')
+            self.write_stdout('SUCCESS', prefix=False)
         except Exception as e:
-            stdout.write('FAILED\n')
-            stderr.write('Failed to open SSH connection to [{0}]: {1}\n'.format(self.server, str(e)))
-            traceback.print_exc()
-            exit(1)
+            self.write_stdout('FAILED', prefix=False)
+            self.die([
+                'Failed to open SSH connection to [{}]: {}'.format(self.server, str(e)),
+                traceback.print_exc()
+            ])
