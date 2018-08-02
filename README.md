@@ -19,7 +19,7 @@ This module deploys a command line script to audit a BIND9 server to look for DN
 To run the test suite for this module you must have [Docker](https://www.docker.com/get-docker) available on the machine you will be testing on. This spins up a BIND9 Docker container, sets up SSHD, injects keys, and also configuration files for parsing during the test.
 
 ```
-$ ./test.sh
+$ ./docker_test.sh
 ```
 
 ### Installing Locally
