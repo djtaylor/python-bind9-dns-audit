@@ -4,3 +4,5 @@ dist
 *.pyc
 bind9_dns_audit/__pycache__
 .pytest_cache
+ssh_client_debug.log
+venv
