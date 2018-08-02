@@ -9,11 +9,11 @@ python:
 before_install:
   - docker build . -t bind9_dns_audit_test_bind9 -f Dockerfile_BIND9
   - >
-    docker run -d --name bind9_dns_audit_test -p 60053:53 -p 60053:53/udp -p 60022:22
+    docker run -d --name bind9_dns_audit_test_bind9 -p 60053:53 -p 60053:53/udp -p 60022:22
     -v $(pwd)/docker_test_files/named.conf:/etc/bind/named.conf:ro
     -v $(pwd)/docker_test_files/zone1.conf:/etc/bind/master/zone1.local.conf:ro
     -v $(pwd)/docker_test_files/zone2.conf:/etc/bind/master/zone2.local.conf:ro
-    resystit/bind9:latest
+    bind9_dns_audit_test_bind9
 
 install: pip install -r requirements.txt
 script: python setup.py test
