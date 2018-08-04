@@ -1,0 +1,154 @@
+[
+  {
+    "name": "zone1.local",
+    "type": "master",
+    "is_forward": true,
+    "is_reverse": false,
+    "records": [
+      {
+        "dnsname": "client1.zone1.local",
+        "ipaddr": "192.168.3.15",
+        "ping_response": true,
+        "tcp_ports": {
+          "22": true,
+          "80": false,
+          "443": false
+        }
+      },
+      {
+        "dnsname": "server-production1.zone1.local",
+        "ipaddr": "192.168.3.16",
+        "ping_response": false,
+        "tcp_ports": {
+          "22": false,
+          "80": true,
+          "443": true
+        }
+      },
+      {
+        "dnsname": "server-dev-jenkins1.zone1.local",
+        "ipaddr": "192.168.3.17",
+        "ping_response": true,
+        "tcp_ports": {
+          "22": false,
+          "80": false,
+          "443": false
+        }
+      }
+    ]
+  },
+  {
+    "name": "zone2.local",
+    "type": "master",
+    "is_forward": true,
+    "is_reverse": false,
+    "records": [
+      {
+        "dnsname": "client1.zone2.local",
+        "ipaddr": "192.168.4.15",
+        "ping_response": true,
+        "tcp_ports": {
+          "22": true,
+          "80": false,
+          "443": false
+        }
+      },
+      {
+        "dnsname": "server-production1.zone2.local",
+        "ipaddr": "192.168.4.16",
+        "ping_response": false,
+        "tcp_ports": {
+          "22": false,
+          "80": true,
+          "443": true
+        }
+      },
+      {
+        "dnsname": "server-dev-jenkins1.zone2.local",
+        "ipaddr": "192.168.4.17",
+        "ping_response": true,
+        "tcp_ports": {
+          "22": false,
+          "80": false,
+          "443": false
+        }
+      }
+    ]
+  },
+  {
+    "name": "zone3-alternate.local",
+    "type": "master",
+    "is_forward": true,
+    "is_reverse": false,
+    "records": [
+      {
+        "dnsname": "client1.zone3-alternate.local",
+        "ipaddr": "192.168.5.15",
+        "ping_response": true,
+        "tcp_ports": {
+          "22": true,
+          "80": false,
+          "443": false
+        }
+      },
+      {
+        "dnsname": "server-production1.zone3-alternate.local",
+        "ipaddr": "192.168.5.16",
+        "ping_response": false,
+        "tcp_ports": {
+          "22": false,
+          "80": true,
+          "443": true
+        }
+      },
+      {
+        "dnsname": "server-dev-jenkins1.zone3-alternate.local",
+        "ipaddr": "192.168.5.17",
+        "ping_response": true,
+        "tcp_ports": {
+          "22": false,
+          "80": false,
+          "443": false
+        }
+      }
+    ]
+  },
+  {
+    "name": "zone4.secondary-alternate.local",
+    "type": "master",
+    "is_forward": true,
+    "is_reverse": false,
+    "records": [
+      {
+        "dnsname": "client1.zone4-secondary-alternate.local",
+        "ipaddr": "192.168.6.15",
+        "ping_response": true,
+        "tcp_ports": {
+          "22": true,
+          "80": false,
+          "443": false
+        }
+      },
+      {
+        "dnsname": "server-production1.zone4-secondary-alternate.local",
+        "ipaddr": "192.168.6.16",
+        "ping_response": false,
+        "tcp_ports": {
+          "22": false,
+          "80": true,
+          "443": true
+        }
+      },
+      {
+        "dnsname": "server-dev-jenkins1.zone4-secondary-alternate.local",
+        "ipaddr": "192.168.6.17",
+        "ping_response": true,
+        "tcp_ports": {
+          "22": false,
+          "80": false,
+          "443": false
+        }
+      }
+    ]
+  }
+]

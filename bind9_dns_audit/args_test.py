@@ -1,64 +1,38 @@
-import sys
 import unittest
-import argparse
-import contextlib
 from copy import deepcopy
+
+from bind9_dns_audit.common_test import hide_stderr, example_args
 
 import bind9_dns_audit.args as bind9_dns_audit_args
 
 class BIND9_DNS_Audit_Args_Test(unittest.TestCase):
     """Tests for `args.py`."""
 
-    example_args = [
-        '127.0.0.1',
-        '--ssh-user',
-        'test',
-        '--ssh-port',
-        '22',
-        '--zones-config',
-        '/etc/bind/named.conf.local',
-        '--pretty-print',
-        '--check-tcp-ports',
-        '22,40',
-        '--check-tcp-ports-timeout',
-        '1',
-        '--debug']
-
     def test_args_parse(self):
         """Test creating an arguments object directly with `parse`"""
         args = bind9_dns_audit_args.BIND9_DNS_Audit_Args()
-        self.assertTrue(args.parse(self.example_args))
+        self.assertTrue(args.parse(example_args['pp_list']))
 
     def test_args_create(self):
         """Test creating args by calling the `construct` classmethod"""
         args = bind9_dns_audit_args.BIND9_DNS_Audit_Args()
-        self.assertIsInstance(args.construct(self.example_args), tuple)
+        self.assertIsInstance(args.construct(example_args['csv_list']), tuple)
+
+    def test_args_version(self):
+        """Test the command to return installed program version"""
+        args = bind9_dns_audit_args.BIND9_DNS_Audit_Args()
+
+        with self.assertRaises(SystemExit) as cm:
+            args.construct(['--version'])
 
     def test_args_invalid_command(self):
         """Test args with an invalid command, should fail"""
         args = bind9_dns_audit_args.BIND9_DNS_Audit_Args()
 
-        # Make an invalid args object
-        invalid_args = deepcopy(self.example_args)
-        invalid_args.append('--unsupported-flag')
-
-        # Supress stderr, should fail
-        @contextlib.contextmanager
-        def hide_stderr():
-            savestderr = sys.stderr
-            class Devnull(object):
-                def write(self, _): pass
-                def flush(self): pass
-            sys.stderr = Devnull()
-            try:
-                yield
-            finally:
-                sys.stderr = savestderr
-
         # This should fail
         with hide_stderr():
             with self.assertRaises(SystemExit):
-                args.construct(invalid_args)
+                args.construct(example_args['invalid'])
 
 if __name__ == '__main__':
     unittest.main()

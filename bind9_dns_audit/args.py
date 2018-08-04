@@ -4,6 +4,7 @@ from os import getenv
 from sys import stderr, exit, argv
 from immutable_collection import ImmutableCollection
 
+from bind9_dns_audit import __version__
 from bind9_dns_audit.common import BIND9_DNS_Audit_Common
 
 class BIND9_DNS_Audit_Args(BIND9_DNS_Audit_Common):
@@ -42,8 +43,9 @@ class BIND9_DNS_Audit_Args(BIND9_DNS_Audit_Common):
         output_group.add_argument('--pretty-print', help="Generate a formatted report for the CLI", action='store_true')
         output_group.add_argument('--csv', help="Generate CSV formatted output for loading into other applications", action='store_true')
 
-        # Debug output
+        # Debug/version output
         parser.add_argument('--debug', help="Show additional debug messages", action='store_true')
+        parser.add_argument('--version', help="Show the installed program version", action='version', version='bind9_dns_audit {}'.format(__version__))
 
         # Parse provided arguments
         args = parser.parse_args(args)
