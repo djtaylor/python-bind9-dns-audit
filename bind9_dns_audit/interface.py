@@ -1,14 +1,6 @@
 from __future__ import unicode_literals
-from builtins import str
-import re
-import json
-import socket
-import threading
 from time import time
-from six import iteritems
-from getpass import getpass
-from subprocess import Popen, PIPE
-from sys import stderr,exit
+from sys import exit
 
 from bind9_dns_audit.args import BIND9_DNS_Audit_Args
 from bind9_dns_audit.common import BIND9_DNS_Audit_Common

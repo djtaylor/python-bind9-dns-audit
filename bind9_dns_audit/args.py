@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import argparse
 from os import getenv
-from sys import stderr, exit, argv
+from sys import argv
 from immutable_collection import ImmutableCollection
 
 from bind9_dns_audit import __version__
