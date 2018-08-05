@@ -3,7 +3,7 @@ from six import string_types
 
 from bind9_dns_audit.common_test import example_args, get_example_zones
 
-from bind9_dns_audit.interface import BIND9_DNS_Audit_Report
+from bind9_dns_audit.report import BIND9_DNS_Audit_Report
 
 class BIND9_DNS_Audit_Report_Test(unittest.TestCase):
     """Tests for `report.py`."""
