@@ -17,9 +17,8 @@ fi
 
 # Run the BIND9 container
 docker run -d --name bind9_dns_audit_test_bind9 -p 60053:53 -p 60053:53/udp -p 60022:22 \
+-v $(pwd)/docker_test_files/zones:/etc/bind/master:ro \
 -v $(pwd)/docker_test_files/named.conf:/etc/bind/named.conf:ro \
--v $(pwd)/docker_test_files/zone1.conf:/etc/bind/master/zone1.local.conf:ro \
--v $(pwd)/docker_test_files/zone2.conf:/etc/bind/master/zone2.local.conf:ro \
 bind9_dns_audit_test_bind9
 
 # Run the tests

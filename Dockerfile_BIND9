@@ -3,7 +3,8 @@ FROM resystit/bind9:latest
 RUN apk add --update git openssh-client openssh-server
 RUN mkdir -m 700 /root/.ssh
 
-COPY --chown=root:root docker_test_files* /etc/ssh/
+COPY --chown=root:root docker_test_files/ssh_host_rsa_key /etc/ssh/ssh_host_rsa_key
+COPY --chown=root:root docker_test_files/ssh_host_rsa_key.pub /etc/ssh/ssh_host_rsa_key.pub
 COPY --chown=root:root docker_test_files/id_rsa_test.pub /root/.ssh/authorized_keys
 
 RUN chmod 644 /root/.ssh/authorized_keys && chmod 600 /etc/ssh/ssh_host_rsa_key

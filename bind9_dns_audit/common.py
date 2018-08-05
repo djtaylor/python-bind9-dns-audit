@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-from builtins import str
 from colorama import init as colorama_init
 from termcolor import colored
 from sys import stdout, stderr, exit
