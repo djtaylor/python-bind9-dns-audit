@@ -1,17 +1,7 @@
 [![Build Status](https://api.travis-ci.org/djtaylor/python-bind9-dns-audit.png)](https://api.travis-ci.org/djtaylor/python-bind9-dns-audit)
 
 # BIND9 DNS Audit
-
 This module deploys a command line script to audit a BIND9 server to look for DNS records that don't have any backing infrastructure and be deleted. This script takes a BIND9 configuration path, and parses this for any zone definitions, then parses each zone configuration for A records to audit for connectivity. Currently this uses a combination of ping and TCP port checks to determine if a particular A record/IP address is pointing to a functional machine.
-
-### Motivation
-This project came about as a means to audit and clean up my company's BIND9 server with multiple zones with several hundred records each.
-
-### Caveats
-The following are a list of caveats/notes about the functionality in the first release of this module:
-
- - Only works with SSH key based authentication. You will need to install your public key on the BIND9 DNS server for the account you plan to connect with. This user should have read access to BIND9 configuration files.
- - Designed specifically to parse A records in a BIND9 forward zone. Other record types (CNAME,TXT,etc) and reverse zones are in scope for future releases.
 
  - [Testing](#testing)
  - [Installing Locally](#installing-locally)
@@ -21,6 +11,15 @@ The following are a list of caveats/notes about the functionality in the first r
  - [Docker](#docker)
    - [Building](#building-in-docker)
    - [Running](#running-in-docker)
+
+### Motivation
+This project came about as a means to audit and clean up my company's BIND9 server with multiple zones with several hundred records each.
+
+### Caveats
+The following are a list of caveats/notes about the functionality in the first release of this module:
+
+  - Only works with SSH key based authentication. You will need to install your public key on the BIND9 DNS server for the account you plan to connect with. This user should have read access to BIND9 configuration files.
+  - Designed specifically to parse A records in a BIND9 forward zone. Other record types (CNAME,TXT,etc) and reverse zones are in scope for future releases.
 
 ### Testing
 To run the test suite for this module you must have [Docker](https://www.docker.com/get-docker) available on the machine you will be testing on. This spins up a BIND9 Docker container, sets up SSHD, injects keys, and also configuration files for parsing during the test.
